@@ -2,8 +2,9 @@ var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
 var x = canvas.width / 2;
 var y = canvas.height - 30;
-var dx = 4;
-var dy = -4;
+var speed = 4;
+var dx = speed;
+var dy = -speed;
 var ballRadius = 10;
 var scoreMultiplier = 5;
 
@@ -175,8 +176,8 @@ function draw() {
             else {
                 x = canvas.width/2;
                 y=canvas.height - 30;
-                dx =2;
-                dy = -2;
+                dx = speed;
+                dy = -speed;
                 paddleX = (canvas.width-paddleWidth)/2;
             }
 
