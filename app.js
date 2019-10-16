@@ -23,7 +23,10 @@ var brickHeight = 20;
 var brickPadding = 10;
 var brickOffsetTop = 30;
 var brickOffsetBottom = 30;
-brickOffsetLeft = 30;
+var brickOffsetLeft = 30;
+
+// score
+var score = 0
 
 // bricks in a two dimensional array columns, c and rows, r.
 var bricks = []; // creates an empty array
@@ -32,7 +35,8 @@ for (var c = 0; c < brickColumnCount; c++) {
     for (var r = 0; r < brickRowCount; r++) {
         bricks[c][r] = {
             x: 0,
-            y: 0
+            y: 0,
+            status: 1
         };
     }
 }
@@ -41,23 +45,60 @@ for (var c = 0; c < brickColumnCount; c++) {
 function drawBricks() {
     for (var c = 0; c < brickColumnCount; c++) {
         for (var r = 0; r < brickRowCount; r++) {
-            var brickX = (c * (brickWidth + brickPadding)) + brickOffsetLeft;
-            var brickY = (r * (brickHeight + brickPadding)) + brickOffsetTop;
-            bricks[c][r].x = brickX;
-            bricks[c][r].y = brickY;
-            ctx.beginPath();
-            ctx.rect(brickX, brickY, brickWidth, brickHeight);
-            ctx.fillStyle = "#0095DD";
-            ctx.fill();
-            ctx.closePath();
+            if (bricks[c][r].status == 1) {
+                var brickX = (c * (brickWidth + brickPadding)) + brickOffsetLeft;
+                var brickY = (r * (brickHeight + brickPadding)) + brickOffsetTop;
+                bricks[c][r].x = brickX;
+                bricks[c][r].y = brickY;
+                ctx.beginPath();
+                ctx.rect(brickX, brickY, brickWidth, brickHeight);
+                ctx.fillStyle = "#0095DD";
+                ctx.fill();
+                ctx.closePath();
+            }
         }
     }
 }
 
+// collision detection
+function collisionDetection() {
+    for (var c = 0; c < brickColumnCount; c++) {
+        for (var r = 0; r < brickRowCount; r++) {
+            var b = bricks[c][r];
+            if (b.status == 1) {
+                if (x > b.x && x < b.x + brickWidth && y > b.y && y < b.y + brickHeight) {
+                    dy = -dy;
+                    b.status = 0;
+                    score += 5;
+                    if (score == brickRowCount * brickColumnCount) {
+                        alert("You won. Good Game. You scored " + score + ".")
+                        document.location.reload();
+                        clearInterval(interval);
+                    }
+                }
+            }
+        }
+    }
+}
+
+function drawScore() {
+    ctx.font = "16px Arial";
+    ctx.fillStyle = "#0095DD";
+    ctx.fillText("Score: " + score, 8, 20);
+}
 
 // event listeners
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
+document.addEventListener("mousemove", mouseMoveHandler, false);
+
+function mouseMoveHandler(e) {
+    var relativeX = e.clientX - canvas.offsetLeft;
+    if (relativeX > 0 && relativeX < canvas.width) {
+        paddleX = relativeX - paddleWidth / 2;
+    }
+    console.log('mouse')
+}
 
 function keyDownHandler(e) {
     if (e.key == "Right" || e.key == "ArrowRight") {
@@ -97,8 +138,9 @@ function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     drawBall();
     drawPaddle();
+    drawScore();
     drawBricks();
-
+    collisionDetection();
     // collision left and right 
     if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) {
         dx = -dx;
@@ -114,7 +156,7 @@ function draw() {
             // dx -= 0.5;
             // dy -= 0.5;
         } else {
-            alert("GAME OVER");
+            alert("Game Over. You Scored: " + score + ".");
             document.location.reload();
             clearInterval(interval);
         }
