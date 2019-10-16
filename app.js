@@ -2,9 +2,10 @@ var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
 var x = canvas.width / 2;
 var y = canvas.height - 30;
-var dx = 2;
-var dy = -2;
+var dx = 4;
+var dy = -4;
 var ballRadius = 10;
+var scoreMultiplier = 5;
 
 // defining paddle
 var paddleHeight = 10;
@@ -26,7 +27,10 @@ var brickOffsetBottom = 30;
 var brickOffsetLeft = 30;
 
 // score
-var score = 0
+var score = 0;
+
+// lives
+var lives = 3;
 
 // bricks in a two dimensional array columns, c and rows, r.
 var bricks = []; // creates an empty array
@@ -69,11 +73,10 @@ function collisionDetection() {
                 if (x > b.x && x < b.x + brickWidth && y > b.y && y < b.y + brickHeight) {
                     dy = -dy;
                     b.status = 0;
-                    score += 5;
-                    if (score == brickRowCount * brickColumnCount) {
+                    score += scoreMultiplier;
+                    if (score == brickRowCount * brickColumnCount * scoreMultiplier) {
                         alert("You won. Good Game. You scored " + score + ".")
                         document.location.reload();
-                        clearInterval(interval);
                     }
                 }
             }
@@ -87,10 +90,16 @@ function drawScore() {
     ctx.fillText("Score: " + score, 8, 20);
 }
 
+function drawLives() {
+    ctx.font = "16px Arial";
+    ctx.fillStyle = "#0095DD";
+    ctx.fillText("Lives: " + lives, canvas.width - 65, 20);
+}
+
 // event listeners
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
-document.addEventListener("mousemove", mouseMoveHandler, false);
+document.addEventListener("mousemove", mouseMoveHandler, false); // doesn't work on chrome when dev tools are open.
 
 function mouseMoveHandler(e) {
     var relativeX = e.clientX - canvas.offsetLeft;
@@ -139,6 +148,7 @@ function draw() {
     drawBall();
     drawPaddle();
     drawScore();
+    drawLives();
     drawBricks();
     collisionDetection();
     // collision left and right 
@@ -156,9 +166,20 @@ function draw() {
             // dx -= 0.5;
             // dy -= 0.5;
         } else {
-            alert("Game Over. You Scored: " + score + ".");
-            document.location.reload();
-            clearInterval(interval);
+            lives--;
+
+            if (!lives) {
+                alert("Game Over. You Scored: " + score + ".");
+                document.location.reload();
+            }
+            else {
+                x = canvas.width/2;
+                y=canvas.height - 30;
+                dx =2;
+                dy = -2;
+                paddleX = (canvas.width-paddleWidth)/2;
+            }
+
         }
     }
 
@@ -175,6 +196,8 @@ function draw() {
     }
     x += dx;
     y += dy;
+
+    requestAnimationFrame(draw);
 }
 
-var interval = setInterval(draw, 10);
+draw();
